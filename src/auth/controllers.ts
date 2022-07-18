@@ -1,50 +1,18 @@
 import { RequestHandler } from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 
-import prisma from '../prisma/client';
+import authService from './services';
 
 const login: RequestHandler = async (req, res) => {
   const { email, password } = req.body;
-  const user = await prisma.user.findUnique({
-    where: {
-      email,
-    },
-  });
+  const token = await authService.validate({ email, password });
 
-  const isValid = user ? await bcrypt.compare(password, user.password) : false;
-
-  if (!user || !isValid) {
-    return res.status(401).send('Invalid credentials');
+  if (token) {
+    return res.status(200).json({ token });
   }
 
-  const token = jwt.sign(
-    { email, userId: user.id },
-    process.env.SECRET as string,
-    { expiresIn: '8h' }
-  );
-
-  return res.status(200).json({ token, userId: user.id });
-};
-
-const register: RequestHandler = async (req, res) => {
-  const { email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(
-    password,
-    process.env.SALT_ROUNDS as string
-  );
-
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-    },
-  });
-
-  return res.status(201).json({ id: user.id });
+  return res.status(401).send('Invalid credentials');
 };
 
 export default {
   login,
-  register,
 };
