@@ -18,6 +18,24 @@ const findUser = async (email: string) => {
   return user;
 };
 
+export const createUser = async ({
+  email,
+  password,
+}: {
+  email: string;
+  password: string;
+}) => {
+  const hashedPassword = await bcrypt.hash(password, 12);
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword,
+    },
+  });
+
+  return user;
+};
+
 const login: RequestHandler = async (req, res, next) => {
   const { email, password } = req.body as userLoginData;
 
@@ -48,13 +66,7 @@ const register: RequestHandler = async (req, res, next) => {
     );
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({
-    data: {
-      email,
-      password: hashedPassword,
-    },
-  });
+  const user = await createUser({ email, password });
 
   return res.status(201).json({ userId: user.id });
 };

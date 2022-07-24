@@ -1,13 +1,11 @@
-import bcrypt from 'bcrypt';
 import prisma from './client';
 
+import { createUser } from '../auth/controllers';
+
 async function main() {
-  const password = await bcrypt.hash('password', 12);
-  const user = await prisma.user.create({
-    data: {
-      email: 'admin@example.com',
-      password,
-    },
+  const user = await createUser({
+    email: 'admin@example.com',
+    password: 'password',
   });
   console.log(`Created user with id: ${user.id}`);
 }
