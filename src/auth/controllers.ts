@@ -25,7 +25,7 @@ const login: RequestHandler = async (req, res, next) => {
 
   if (!isValid) {
     return next(
-      new HttpError(401, 'No active account found with the given credentials.')
+      new HttpError(400, 'No active account found with the given credentials.')
     );
   }
   const payload: TokenPayload = { email, userId: user.id };
@@ -38,22 +38,13 @@ const login: RequestHandler = async (req, res, next) => {
 };
 
 const register: RequestHandler = async (req, res, next) => {
-  const { email, password, confirmPassword } = req.body as userRegisterData;
-
-  if (!email) {
-    return next(new HttpError(400, 'No email was given.'));
-  }
+  const { email, password } = req.body as userRegisterData;
 
   const existingUser = await findUser(email);
-
   if (existingUser) {
     return next(
       new HttpError(400, 'User with given email address already exists.')
     );
-  }
-
-  if (password !== confirmPassword) {
-    return next(new HttpError(400, 'Passwords do not match.'));
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -64,7 +55,7 @@ const register: RequestHandler = async (req, res, next) => {
     },
   });
 
-  res.status(201).json({ userId: user.id });
+  return res.status(201).json({ userId: user.id });
 };
 
 export default {
