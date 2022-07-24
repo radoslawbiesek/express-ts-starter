@@ -1,14 +1,11 @@
 import express from 'express';
-import dotenv from 'dotenv';
 
 import authRoutes from './auth/routes';
 import errorHandler from './utils/errors/error-handler';
 import { authenticate } from './auth/middlewares';
-
-dotenv.config();
+import config from './config';
 
 const app = express();
-const port = process.env.PORT;
 
 app.use(express.json());
 
@@ -20,6 +17,6 @@ app.get('/hello', (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log(`Server is running at https://localhost:${port}`);
+app.listen(config.port, () => {
+  console.log(`Server is running at https://localhost:${config.port}`);
 });

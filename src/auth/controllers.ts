@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 
 import prisma from '../prisma/client';
 import HttpError from '../utils/errors/HttpError';
+import config from '../config';
 
 import { userRegisterData, userLoginData, TokenPayload } from './models';
 
@@ -30,8 +31,8 @@ const login: RequestHandler = async (req, res, next) => {
   }
   const payload: TokenPayload = { email, userId: user.id };
 
-  const token = jwt.sign(payload, process.env.SECRET as string, {
-    expiresIn: '2h',
+  const token = jwt.sign(payload, config.jwt.secret, {
+    expiresIn: config.jwt.expiresIn,
   });
 
   return res.status(200).json({ token });
